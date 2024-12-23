@@ -11,6 +11,8 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+
     <application
         android:allowBackup="true"
         android:label="Shake Flashlight"
@@ -22,6 +24,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".ShakeService" />
+        <service android:name=".ShakeService" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Special use service to monitor for shakes to toggle flashlight"/>
+        </service>
     </application>
 </manifest>

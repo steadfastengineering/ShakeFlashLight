@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -42,7 +43,6 @@ public class ShakeService extends Service implements SensorEventListener {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             cameraId = cameraManager.getCameraIdList()[0];
@@ -50,9 +50,7 @@ public class ShakeService extends Service implements SensorEventListener {
             e.printStackTrace();
         }
 
-        startForeground(1, getNotification());
 
-        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private Notification getNotification() {
@@ -66,7 +64,7 @@ public class ShakeService extends Service implements SensorEventListener {
         }
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE );
 
         return new NotificationCompat.Builder(this, channelId)
                 .setContentTitle("Shake Flashlight Service")
@@ -78,6 +76,19 @@ public class ShakeService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // As of Android 14 we must invoke startForeground(...) within some amount of time from
+        // sending the intent for the service from MainActivity.
+
+        // Send service info type for SDK version (also declared in Manifest).
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            startForeground(69420, getNotification());
+        } else {
+            startForeground(69420, getNotification(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        }
+
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
         return START_STICKY;
     }
 
