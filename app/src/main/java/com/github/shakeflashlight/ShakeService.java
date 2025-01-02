@@ -32,7 +32,7 @@ public class ShakeService extends Service implements SensorEventListener {
     private boolean isFlashlightOn = false;
     private int shakeCount = 0;
     private long lastShakeTime = 0;
-    private static final int SHAKE_THRESHOLD = 15; // Adjust based on sensitivity
+    private static final int SHAKE_THRESHOLD = 10;// 15; // Adjust based on sensitivity
     private static final int SHAKE_COUNT_RESET_TIME_MS = 3000; // Time to reset shake count
     private static final int SHAKE_INTERVAL_MS = 500; // Interval to detect consecutive shakes
 
@@ -127,7 +127,7 @@ public class ShakeService extends Service implements SensorEventListener {
         if (acceleration > SHAKE_THRESHOLD) {
             if (currentTime - lastShakeTime < SHAKE_INTERVAL_MS) {
                 shakeCount++;
-                if (shakeCount >= 2) {
+                if (shakeCount >= 3) {
                     toggleFlashlight();
                     shakeCount = 0;
                 }
